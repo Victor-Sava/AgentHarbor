@@ -1,27 +1,49 @@
-# AgentHarbor Downloads
+# AgentHarbor
 
-这里仅分发 AgentHarbor Agent 的编译安装包、SHA-256 和使用说明。产品源码保存在独立私有仓库，不需要取得源码权限即可安装。
+**Your coding workspace, wherever you are.**
 
-## 一行安装
+Keep your coding agent on your own computer. Follow its progress, add instructions, and continue conversations from a browser on your laptop or phone.
 
-完整指南：https://agentharbor-web.pages.dev/install
+[Open AgentHarbor](https://agent-harbor.workautoman.com) · [Installation guide](https://agent-harbor.workautoman.com/install) · [Downloads](https://github.com/Victor-Sava/AgentHarbor/releases)
 
-macOS（Apple 芯片 / Intel）与 Linux x64：
+## How it works
+
+- **Run on your own devices.** Keep your projects and model credentials in your existing development environment.
+- **Continue in your browser.** Connect your computer to your workspace to view sessions and send follow-up instructions.
+- **Keep conversations encrypted.** Your devices hold the keys used to decrypt synchronized session content.
+
+AgentHarbor provides the connection between your devices and the web workspace. Bring your own model account; model usage is billed by your provider. Your computer must remain online with the agent running to execute tasks.
+
+## Install the agent
+
+### macOS and Linux
 
 ```bash
-curl -fsSL https://agentharbor-web.pages.dev/install.sh | bash
+curl -fsSL https://agent-harbor.workautoman.com/install.sh | bash
 ```
 
-Windows x64 PowerShell：
+Supports Apple silicon and Intel Macs, plus Linux x64 with glibc. Linux is tested on Ubuntu 24.04; Alpine/musl is not supported. Reopen your terminal after installation.
+
+### Windows
+
+Run in PowerShell on Windows x64:
 
 ```powershell
-irm https://agentharbor-web.pages.dev/install.ps1 | iex
+irm https://agent-harbor.workautoman.com/install.ps1 | iex
 ```
 
-安装器自动选择平台、核对 SHA-256 并安装到用户目录。首次模型登录、身份配置和网页配对需要用户完成。升级前先结束任务并运行 `agentharbor-agent stop`，然后重复安装命令。
+The installer downloads the matching package, verifies its SHA-256 checksum, and installs it for the current user. No local Node.js, Rust, or C++ build environment is needed. Existing configuration is preserved.
 
-当前为预览版，Windows 未签名，macOS 未做 Apple 公证。Linux 目前验证 Ubuntu 24.04 x64，需要 glibc；不支持 Alpine/musl。安装器不关闭系统安全检查。
+## Connect your workspace
 
-[下载版本](https://github.com/Victor-Sava/agentharbor-downloads/releases) · [打开工作区](https://agentharbor-web.pages.dev)
+1. Sign in to your model provider on the computer running the agent.
+2. Follow the [installation guide](https://agent-harbor.workautoman.com/install) to configure your identity and enabled provider.
+3. Run `agentharbor-agent login`, then approve the connection in [AgentHarbor](https://agent-harbor.workautoman.com).
 
-许可证与第三方归属随安装归档保留。
+To upgrade, finish active tasks and run `agentharbor-agent stop`. Run the same installation command again, then `agentharbor-agent start`.
+
+## About these downloads
+
+This repository contains the product overview, installation instructions, and prebuilt releases. Product source is maintained privately. Release archives include license notices and SHA-256 files.
+
+These are preview builds. Windows binaries are not code-signed, and macOS binaries are not Apple-notarized. The installers do not disable operating-system security checks.
