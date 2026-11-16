@@ -38,7 +38,7 @@ The installer downloads the matching package, verifies its SHA-256 checksum, and
 
 1. Sign in to your model provider on the computer running the agent.
 2. Follow the [installation guide](https://agent-harbor.workautoman.com/install) to configure your identity and enabled provider.
-3. Run `agentharbor-agent login`, then approve the connection in [AgentHarbor](https://agent-harbor.workautoman.com).
+3. Run `agentharbor-agent login`, then paste the `agentharbor://terminal?...` authorization link into **Connect computer** in [AgentHarbor](https://agent-harbor.workautoman.com).
 
 To upgrade, finish active tasks and run `agentharbor-agent stop`. Run the same installation command again, then `agentharbor-agent start`.
 
