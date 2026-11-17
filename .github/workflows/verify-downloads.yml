@@ -1,0 +1,97 @@
+name: Verify public installers
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Published preview version to verify
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      AGENTHARBOR_VERSION: ${{ inputs.version }}
+      AGENTHARBOR_INSTALL_DIR: ${{ runner.temp }}/agentharbor-install
+      AGENTHARBOR_BIN_DIR: ${{ runner.temp }}/agentharbor-bin
+      AGENTHARBOR_HOME_DIR: ${{ runner.temp }}/agentharbor-account
+      AGENTHARBOR_NO_MODIFY_PATH: '1'
+    steps:
+      - name: Install and verify on macOS or Linux
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$AGENTHARBOR_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
+          mkdir -p "$AGENTHARBOR_HOME_DIR"
+          printf 'keep existing configuration' > "$AGENTHARBOR_HOME_DIR/sentinel"
+          curl -fsSL https://agent-harbor.workautoman.com/install.sh -o "$RUNNER_TEMP/install.sh"
+          for attempt in first repeat; do
+            bash "$RUNNER_TEMP/install.sh"
+            [[ "$("$AGENTHARBOR_BIN_DIR/agentharbor-agent" --version)" == "AgentHarbor Agent $AGENTHARBOR_VERSION" ]]
+          done
+          "$AGENTHARBOR_BIN_DIR/agentharbor-agent" logout --help | grep -F 'logout'
+          before=$(shasum -a 256 "$AGENTHARBOR_BIN_DIR/agentharbor-agent")
+          export AGENTHARBOR_QA_CURL="$(command -v curl)"
+          mkdir -p "$RUNNER_TEMP/mock-bin"
+          cat > "$RUNNER_TEMP/mock-bin/curl" <<'SH'
+          #!/usr/bin/env bash
+          for value in "$@"; do
+            if [[ "$value" == https://*.sha256 ]]; then
+              printf '%064d  invalid.tar.gz\n' 0 > "${!#}"
+              exit 0
+            fi
+          done
+          exec "$AGENTHARBOR_QA_CURL" "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/mock-bin/curl"
+          if PATH="$RUNNER_TEMP/mock-bin:$PATH" bash "$RUNNER_TEMP/install.sh" > "$RUNNER_TEMP/rejected.log" 2>&1; then
+            echo 'An invalid checksum was accepted'; exit 1
+          fi
+          grep -i 'SHA-256 mismatch' "$RUNNER_TEMP/rejected.log"
+          [[ "$before" == "$(shasum -a 256 "$AGENTHARBOR_BIN_DIR/agentharbor-agent")" ]]
+          [[ "$(cat "$AGENTHARBOR_HOME_DIR/sentinel")" == 'keep existing configuration' ]]
+          echo 'Install, reinstall, checksum rejection and configuration preservation passed.'
+      - name: Install and verify in Windows PowerShell 5.1
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:AGENTHARBOR_VERSION -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') { throw 'Invalid version' }
+          New-Item -ItemType Directory -Force $env:AGENTHARBOR_HOME_DIR | Out-Null
+          $sentinel = Join-Path $env:AGENTHARBOR_HOME_DIR 'sentinel'
+          Set-Content -LiteralPath $sentinel -Value 'keep existing configuration'
+          $installer = Join-Path $env:RUNNER_TEMP 'install.ps1'
+          Invoke-WebRequest -UseBasicParsing -Uri 'https://agent-harbor.workautoman.com/install.ps1' -OutFile $installer
+          $launcher = Join-Path $env:AGENTHARBOR_INSTALL_DIR 'bin\agentharbor-agent.cmd'
+          foreach ($attempt in @('first', 'repeat')) {
+            & $installer
+            $reported = & $launcher --version
+            if ($LASTEXITCODE -ne 0 -or $reported -ne "AgentHarbor Agent $env:AGENTHARBOR_VERSION") { throw 'Version mismatch' }
+          }
+          $help = & $launcher logout --help
+          if ($LASTEXITCODE -ne 0 -or ($help -join "`n") -notmatch 'logout') { throw 'Logout command missing' }
+          $before = (Get-FileHash -LiteralPath $launcher -Algorithm SHA256).Hash
+          function Invoke-WebRequest {
+            param($Uri, $OutFile, [switch]$UseBasicParsing)
+            if ($Uri.EndsWith('.sha256')) {
+              [IO.File]::WriteAllText($OutFile, (('0' * 64) + '  invalid.tar.gz'))
+            } else {
+              Microsoft.PowerShell.Utility\Invoke-WebRequest @PSBoundParameters
+            }
+          }
+          $rejected = $false
+          try { & $installer } catch {
+            if ($_.Exception.Message -notmatch 'SHA-256 mismatch') { throw }
+            $rejected = $true
+          }
+          if (-not $rejected) { throw 'An invalid checksum was accepted' }
+          if ($before -ne (Get-FileHash -LiteralPath $launcher -Algorithm SHA256).Hash) { throw 'Launcher changed after rejection' }
+          if ((Get-Content -LiteralPath $sentinel -Raw).Trim() -ne 'keep existing configuration') { throw 'Existing configuration changed' }
+          Write-Output 'PowerShell 5.1 install, reinstall, checksum rejection and configuration preservation passed.'
