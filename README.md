@@ -42,6 +42,20 @@ The installer downloads the matching package, verifies its SHA-256 checksum, and
 
 To upgrade, finish active tasks and run `agentharbor-agent stop`. Run the same installation command again, then `agentharbor-agent start`.
 
+## Disconnect or switch accounts
+
+Agent version `2026.11.5-agentharbor.5` and later includes:
+
+```text
+agentharbor-agent logout
+```
+
+Review the prompt and enter `y` to confirm. This unlinks the computer and deletes the sessions it synced to your web account. Local project files, model credentials, the web account, and other computers' sessions are kept. To pause without removing remote history, use `agentharbor-agent stop` instead.
+
+After a successful logout, back up your old account's Secret Key if needed, sign out in the web app, and create or restore the target account. Run `agentharbor-agent login` and approve the new authorization link in that account. Web logout alone does not unlink your computer or delete the account.
+
+If the command is not recognized, update the Agent first. If removal cannot be confirmed, check connectivity and retry; do not delete your data directory.
+
 ## About these downloads
 
 This repository contains the product overview, installation instructions, and prebuilt releases. Product source is maintained privately. Release archives include license notices and SHA-256 files.
