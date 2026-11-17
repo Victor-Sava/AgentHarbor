@@ -44,7 +44,8 @@ jobs:
           #!/usr/bin/env bash
           for value in "$@"; do
             if [[ "$value" == https://*.sha256 ]]; then
-              printf '%064d  invalid.tar.gz\n' 0 > "${!#}"
+              name="${value##*/}"
+              printf '%064d  %s\n' 0 "${name%.sha256}" > "${!#}"
               exit 0
             fi
           done
@@ -84,7 +85,8 @@ jobs:
           function Invoke-WebRequest {
             param($Uri, $OutFile, [switch]$UseBasicParsing)
             if ($Uri.EndsWith('.sha256')) {
-              [IO.File]::WriteAllText($OutFile, (('0' * 64) + '  invalid.tar.gz'))
+              $name = [IO.Path]::GetFileName(([Uri]$Uri).AbsolutePath) -replace '\.sha256$', ''
+              [IO.File]::WriteAllText($OutFile, (('0' * 64) + '  ' + $name))
             } else {
               Microsoft.PowerShell.Utility\Invoke-WebRequest @PSBoundParameters
             }
