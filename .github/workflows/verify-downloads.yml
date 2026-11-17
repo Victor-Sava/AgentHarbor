@@ -18,9 +18,6 @@ jobs:
     timeout-minutes: 15
     env:
       AGENTHARBOR_VERSION: ${{ inputs.version }}
-      AGENTHARBOR_INSTALL_DIR: ${{ runner.temp }}/agentharbor-install
-      AGENTHARBOR_BIN_DIR: ${{ runner.temp }}/agentharbor-bin
-      AGENTHARBOR_HOME_DIR: ${{ runner.temp }}/agentharbor-account
       AGENTHARBOR_NO_MODIFY_PATH: '1'
     steps:
       - name: Install and verify on macOS or Linux
@@ -28,6 +25,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export AGENTHARBOR_INSTALL_DIR="$RUNNER_TEMP/agentharbor-install"
+          export AGENTHARBOR_BIN_DIR="$RUNNER_TEMP/agentharbor-bin"
+          export AGENTHARBOR_HOME_DIR="$RUNNER_TEMP/agentharbor-account"
           [[ "$AGENTHARBOR_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
           mkdir -p "$AGENTHARBOR_HOME_DIR"
           printf 'keep existing configuration' > "$AGENTHARBOR_HOME_DIR/sentinel"
@@ -63,6 +63,9 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
+          $env:AGENTHARBOR_INSTALL_DIR = Join-Path $env:RUNNER_TEMP 'agentharbor-install'
+          $env:AGENTHARBOR_BIN_DIR = Join-Path $env:RUNNER_TEMP 'agentharbor-bin'
+          $env:AGENTHARBOR_HOME_DIR = Join-Path $env:RUNNER_TEMP 'agentharbor-account'
           if ($env:AGENTHARBOR_VERSION -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$') { throw 'Invalid version' }
           New-Item -ItemType Directory -Force $env:AGENTHARBOR_HOME_DIR | Out-Null
           $sentinel = Join-Path $env:AGENTHARBOR_HOME_DIR 'sentinel'
