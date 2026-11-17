@@ -16,7 +16,7 @@ AgentHarbor provides the connection between your devices and the web workspace. 
 
 ## Desktop for Windows
 
-[Download AgentHarbor Desktop for Windows x64](https://github.com/Victor-Sava/AgentHarbor/releases/download/v2026.11.1-preview.1/AgentHarbor-Desktop-2026.11.1-preview.1-win-x64.exe) · [Release notes and checksums](https://github.com/Victor-Sava/AgentHarbor/releases/tag/v2026.11.1-preview.1)
+[Download AgentHarbor Desktop for Windows x64](https://github.com/Victor-Sava/AgentHarbor/releases/download/v2026.11.1-preview.2/AgentHarbor-Desktop-2026.11.1-preview.2-win-x64.exe) · [Release notes and checksums](https://github.com/Victor-Sava/AgentHarbor/releases/tag/v2026.11.1-preview.2)
 
 Run the installer and open AgentHarbor. The desktop app connects to the Agent on your computer; if one is not installed yet, setup can download the recommended Agent. Use your own model account. This Windows installer is an unsigned preview. macOS and Linux desktop installers are not included in this release.
 
