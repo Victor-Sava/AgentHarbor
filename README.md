@@ -14,6 +14,14 @@ Keep your coding agent on your own computer. Follow its progress, add instructio
 
 AgentHarbor provides the connection between your devices and the web workspace. Bring your own model account; model usage is billed by your provider. Your computer must remain online with the agent running to execute tasks.
 
+## Desktop for Windows
+
+[Download AgentHarbor Desktop for Windows x64](https://github.com/Victor-Sava/AgentHarbor/releases/download/v2026.11.1-preview.1/AgentHarbor-Desktop-2026.11.1-preview.1-win-x64.exe) · [Release notes and checksums](https://github.com/Victor-Sava/AgentHarbor/releases/tag/v2026.11.1-preview.1)
+
+Run the installer and open AgentHarbor. The desktop app connects to the Agent on your computer; if one is not installed yet, setup can download the recommended Agent. Use your own model account. This Windows installer is an unsigned preview. macOS and Linux desktop installers are not included in this release.
+
+The command-line Agent installers below remain available separately.
+
 ## Install the agent
 
 ### macOS and Linux
